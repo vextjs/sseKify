@@ -1,0 +1,50 @@
+{
+    "name": "ssekit",
+    "version": "0.1.0",
+    "description": "Framework-agnostic Server-Sent Events helper for Node.js with optional Redis Pub/Sub.",
+    "license": "MIT",
+    "author": "Your Name <you@example.com>",
+    "homepage": "https://github.com/your-org/ssekit#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/your-org/ssekit.git"
+    },
+    "bugs": {
+        "url": "https://github.com/your-org/ssekit/issues"
+    },
+    "type": "commonjs",
+    "main": "lib/index.js",
+    "exports": {
+        ".": "./lib/index.js",
+        "./lib": "./lib/index.js",
+        "./lib/redisAdapter": "./lib/redisAdapter.js"
+    },
+    "files": [
+        "lib",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "keywords": [
+        "sse",
+        "server-sent-events",
+        "realtime",
+        "redis",
+        "pubsub"
+    ],
+    "engines": {
+        "node": ">=14"
+    },
+    "scripts": {
+        "dev:express": "node examples/express.js",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {},
+    "optionalDependencies": {
+        "ioredis": "^5.4.1"
+    },
+    "devDependencies": {
+        "vitest": "^2.0.0"
+    }
+}
