@@ -1,16 +1,16 @@
 const index = require('express')
-const { SSEKit, createIORedisAdapter } = require('../../lib')
+const { SSEKify, createIORedisAdapter } = require('../../lib')
 
-// 简单的 Express 示例，展示如何接入 sseKit
+// 简单的 Express 示例，展示如何接入 ssekify
 const app = index()
 app.use(index.json())
 
-// 创建 SSEKit 实例
+// 创建 SSEKify 实例
 // 提示：若需跨实例（多进程/多节点）分发消息，可配置 Redis 适配器
-const sse = new SSEKit({
+const sse = new SSEKify({
     // 可选：使用环境变量提供 Redis 连接串
     // redis: process.env.REDIS_URL ? createIORedisAdapter(process.env.REDIS_URL) : undefined,
-    channel: 'ssekit:bus',        // 跨实例发布所用的频道名
+    channel: 'ssekify:bus',        // 跨实例发布所用的频道名
     keepAliveMs: 15000,           // 心跳间隔，用于保持连接不断开
     retryMs: 2000,                // 建议浏览器重连的间隔（SSE 标准 retry 行）
     recentBufferSize: 20          // 每个用户最近消息缓冲，用于 Last-Event-ID 轻量重放（设 0 关闭）
@@ -19,7 +19,7 @@ const sse = new SSEKit({
 // 建立 SSE 连接（长连接），注意此路由不要再使用 res.json/res.end
 app.get('/sse', (req, res) => {
     const userId = String(req.query.userId || 'guest')
-    // 重要：不要在 registerConnection 之前调用 res.flushHeaders()，SSEKit 会自动设置/发送必要的响应头
+    // 重要：不要在 registerConnection 之前调用 res.flushHeaders()，SSEKify 会自动设置/发送必要的响应头
     sse.registerConnection(userId, res, { rooms: ['global'] })
     // 如确需手动 flush，可在注册之后调用（通常无需）：
     // res.flushHeaders?.()
@@ -62,11 +62,11 @@ app.get('/', (_req, res) => {
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>sseKit Express 示例</title>
+  <title>ssekify Express 示例</title>
   <style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.6}code{background:#f6f8fa;padding:2px 4px;border-radius:4px}</style>
 </head>
 <body>
-  <h1>sseKit Express 示例</h1>
+  <h1>ssekify Express 示例</h1>
   <p>在新标签页打开 <a href="/sse?userId=alice" target="_blank" rel="noopener">/sse?userId=alice</a> 以建立 SSE 连接。</p>
   <p>然后在本页点击按钮或使用 API 发送消息。</p>
   <div>

@@ -1,4 +1,4 @@
-### sseKit
+### ssekify
 
 一个简单高效、框架无关的 Node.js Server‑Sent Events (SSE) 工具。单实例即可使用；如需横向扩展，支持通过 Redis Pub/Sub 实现跨实例消息分发。
 
@@ -50,7 +50,7 @@
 
 ### 安装
 ```bash
-npm i ssekit
+npm i ssekify
 # 如需 Redis 跨实例，请额外安装（可选）
 npm i ioredis
 ```
@@ -62,16 +62,16 @@ npm i ioredis
 
 ```js
 const express = require('express')
-const { SSEKit, createIORedisAdapter } = require('ssekit')
+const { SSEKify, createIORedisAdapter } = require('ssekify')
 
 const app = express()
 app.use(express.json())
 
 // 1) 初始化：单实例即可用；如需跨实例（多进程/多节点），配置 Redis 即可
-const sse = new SSEKit({
+const sse = new SSEKify({
   // 可选：REDIS_URL=redis://user:pass@host:6379/0
   // redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
-  channel: 'ssekit:bus',      // 跨实例发布/订阅的频道名
+  channel: 'ssekify:bus',      // 跨实例发布/订阅的频道名
   keepAliveMs: 15000,         // 心跳间隔（确保代理/网关不超时）
   retryMs: 2000,              // 浏览器重连建议（SSE 帧 retry 行）
   recentBufferSize: 20        // 每用户最近消息缓冲（用于 Last-Event-ID 重放）；设 0 关闭
@@ -164,14 +164,14 @@ app.listen(3000, () => console.log('Express 示例: http://localhost:3000'))
 
 - CommonJS：
 ```js
-const { SSEKit, createIORedisAdapter } = require('ssekit')
+const { SSEKify, createIORedisAdapter } = require('ssekify')
 ```
 - 原生 ESM（Node >= 16）：
 ```js
-import { SSEKit, createIORedisAdapter } from 'ssekit'
+import { SSEKify, createIORedisAdapter } from 'ssekify'
 // 也支持默认导入再解构：
-// import ssekit from 'ssekit'
-// const { SSEKit, createIORedisAdapter } = ssekit
+// import ssekify from 'ssekify'
+// const { SSEKify, createIORedisAdapter } = ssekify
 ```
 
 ---
@@ -180,25 +180,25 @@ import { SSEKit, createIORedisAdapter } from 'ssekit'
 本包内置类型声明（index.d.ts），具名导入/默认导入均有完整提示。
 
 ```ts
-import { SSEKit, type SSEKitOptions } from 'ssekit'
-const sse = new SSEKit({ channel: 'ssekit:bus' } satisfies SSEKitOptions)
+import { SSEKify, type SSEKifyOptions } from 'ssekify'
+const sse = new SSEKify({ channel: 'ssekify:bus' } satisfies SSEKifyOptions)
 ```
 
 可选 ioredis 适配器：
 ```ts
-import { createIORedisAdapter } from 'ssekit'
-const sse = new SSEKit({ redis: createIORedisAdapter('redis://localhost:6379') })
+import { createIORedisAdapter } from 'ssekify'
+const sse = new SSEKify({ redis: createIORedisAdapter('redis://localhost:6379') })
 ```
 
 ---
 
 ### API 参考
-- new SSEKit(options?: SSEKitOptions)
+- new SSEKify(options?: SSEKifyOptions)
     - options.redis?: RedisLike | string
         - 跨实例分发所用的 Redis 适配器。可传 `createIORedisAdapter(url)` 的返回值；也支持直接传 URL 字符串（简化启用）。
         - 不配置则仅限当前实例内分发（适合单实例或开发环境）。
-    - options.channel?: string = 'ssekit:bus'
-        - 跨实例消息的 Pub/Sub 频道名；多租户建议每租户独立前缀（如 `ssekit:bus:tenant:{id}`）。
+    - options.channel?: string = 'ssekify:bus'
+        - 跨实例消息的 Pub/Sub 频道名；多租户建议每租户独立前缀（如 `ssekify:bus:tenant:{id}`）。
     - options.keepAliveMs?: number = 15000
         - 心跳间隔（`: ping` 注释行）。建议小于代理/网关的空闲超时，以防被断开。
     - options.retryMs?: number = 2000
@@ -285,7 +285,7 @@ const sse = new SSEKit({ redis: createIORedisAdapter('redis://localhost:6379') }
 - 示例：
 ```js
 const safeStringify = require('safe-stable-stringify')
-const sse = new SSEKit({ serializer: safeStringify, maxPayloadBytes: 512 * 1024 })
+const sse = new SSEKify({ serializer: safeStringify, maxPayloadBytes: 512 * 1024 })
 ```
 
 ---
@@ -335,7 +335,7 @@ app.get('/sse', authFromQuery, (req,res)=>{
 ---
 
 ### 多租户隔离
-- 每租户一个 SSEKit 实例 + 独立 Redis 频道（ssekit:bus:tenant:{tenant}）。
+- 每租户一个 SSEKify 实例 + 独立 Redis 频道（ssekify:bus:tenant:{tenant}）。
 - 路由以租户前缀组织（如 /:tenant/sse、/:tenant/publish-room/:room）。
 - 完整示例：examples/express/multitenant.js（npm run dev:multi）
 - 请求示例：examples/express/multitenant.api.http
@@ -344,9 +344,9 @@ app.get('/sse', authFromQuery, (req,res)=>{
 const kits = new Map()
 function getKit(tenant){
   if(!kits.has(tenant)){
-    kits.set(tenant, new SSEKit({
+    kits.set(tenant, new SSEKify({
       redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
-      channel: `ssekit:bus:tenant:${tenant}`
+      channel: `ssekify:bus:tenant:${tenant}`
     }))
   }
   return kits.get(tenant)
@@ -370,12 +370,12 @@ function getKit(tenant){
 - 心跳会在可用时 `res.flush()`，确保事件及时穿透代理。
 - Docker 构建并运行（以 Express 示例为例）：
 ```bash
-docker build -t ssekit-demo --build-arg EXAMPLE_PATH=examples/express/index.js -f examples/deploy/Dockerfile .
-docker run -p 3000:3000 --name ssekit-demo ssekit-demo
+docker build -t ssekify-demo --build-arg EXAMPLE_PATH=examples/express/index.js -f examples/deploy/Dockerfile .
+docker run -p 3000:3000 --name ssekify-demo ssekify-demo
 ```
 - K8s（以 Express 示例为例）：
 ```bash
-kubectl apply -f examples/deploy/k8s-ssekit-express.yaml
+kubectl apply -f examples/deploy/k8s-ssekify-express.yaml
 ```
 
 ---

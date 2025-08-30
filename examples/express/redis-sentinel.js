@@ -1,7 +1,7 @@
 const express = require('express')
 // 使用 ioredis 通过 Sentinel 连接主库
 const IORedis = require('ioredis')
-const { SSEKit } = require('../../lib')
+const { SSEKify } = require('../../lib')
 
 // 将单个 ioredis 实例包装为 RedisLike 适配器
 function instanceAdapter(instance) {
@@ -41,9 +41,9 @@ const redis = sentinelPairs.length > 0 ? new IORedis({
   password: process.env.REDIS_PASSWORD, // 可选
 }) : null
 
-const sse = new SSEKit({
+const sse = new SSEKify({
   redis: redis ? instanceAdapter(redis) : undefined,
-  channel: process.env.SSE_CHANNEL || 'ssekit:bus:sentinel',
+  channel: process.env.SSE_CHANNEL || 'ssekify:bus:sentinel',
   keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
   retryMs: Number(process.env.SSE_RETRY_MS || 2000),
 })

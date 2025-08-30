@@ -4,7 +4,7 @@
 
 #### [Unreleased]
 ##### Added
-- 新增优雅关闭与运行时指标：SSEKit.stopAccepting()/shutdown() 与 sse.stats()，心跳会在可用时执行 res.flush()。
+- 新增优雅关闭与运行时指标：SSEKify.stopAccepting()/shutdown() 与 sse.stats()，心跳会在可用时执行 res.flush()。
 - 新增 per-connection 背压指标完善：flushQueue 成功写入计入 sent 计数。
 - 新增 Payload 限制与自定义序列化：options.serializer、options.maxPayloadBytes；序列化异常与超限将通过 'error' 事件报告。
 - 新增 重放缓冲治理：options.recentTTLMs、options.recentMaxUsers、sse.clearRecent(userId?)，按 TTL 与 LRU 自动清理。
@@ -46,7 +46,7 @@
   - 新增官方示例：Koa、Fastify、Hapi、Egg（含首页/路由/配置）、Nest。
   - Redis 集群与高可用示例：examples/express/redis-cluster.js、examples/express/redis-sentinel.js。
   - 每个框架目录新增 api.http 便于联调。
-  - 部署样例：examples/deploy/Dockerfile 与 k8s-ssekit-express.yaml。
+  - 部署样例：examples/deploy/Dockerfile 与 k8s-ssekify-express.yaml。
 - 文档：README 全面重构，增加模块系统说明、背压章节、常见问题；STATUS 路线图更新。
 
 ##### Changed
@@ -70,6 +70,6 @@
   - Redis Pub/Sub 适配（跨实例 publish/publishToRoom），REDIS_URL 即可启用。
   - 示例：Express、Egg；测试：Vitest 基础用例。
 
-[Unreleased]: https://github.com/<your-org>/ssekit/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/<your-org>/ssekit/releases/tag/v0.1.1
-[0.1.0]: https://github.com/<your-org>/ssekit/releases/tag/v0.1.0
+[Unreleased]: https://github.com/<your-org>/ssekify/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/<your-org>/ssekify/releases/tag/v0.1.1
+[0.1.0]: https://github.com/<your-org>/ssekify/releases/tag/v0.1.0

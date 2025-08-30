@@ -1,9 +1,9 @@
 const express = require('express')
 const fetcher = globalThis.fetch || ((...args) => import('node-fetch').then(({default: f}) => f(...args)))
-const { SSEKit } = require('../../lib')
+const { SSEKify } = require('../../lib')
 
 // 服务器A：持有客户端 SSE 连接；将任务转发给 B，并提供回调地址 /fanout
-const sse = new SSEKit({ keepAliveMs: 15000, retryMs: 2000 })
+const sse = new SSEKify({ keepAliveMs: 15000, retryMs: 2000 })
 
 const app = express()
 app.use(express.json())

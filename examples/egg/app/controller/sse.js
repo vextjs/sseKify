@@ -11,11 +11,11 @@ class SseController extends Controller {
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>sseKit Egg 示例</title>
+  <title>ssekify Egg 示例</title>
   <style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.6}code{background:#f6f8fa;padding:2px 4px;border-radius:4px}</style>
 </head>
 <body>
-  <h1>sseKit Egg 示例</h1>
+  <h1>ssekify Egg 示例</h1>
   <p>在新标签页打开 <a href="/sse?userId=alice" target="_blank" rel="noopener">/sse?userId=alice</a> 以建立 SSE 连接。</p>
   <div>
     <button id="btnNotify">向 alice 发送通知</button>

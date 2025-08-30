@@ -1,9 +1,9 @@
 const express = require('express')
 // 直接使用 ioredis 的 Cluster，并包装成 RedisLike 适配器
 const IORedis = require('ioredis')
-const { SSEKit } = require('../../lib')
+const { SSEKify } = require('../../lib')
 
-// 将 ioredis Cluster 实例包装为 SSEKit 所需的 RedisLike 接口
+// 将 ioredis Cluster 实例包装为 SSEKify 所需的 RedisLike 接口
 function clusterAdapter(cluster) {
   const listeners = []
   cluster.on('message', (ch, msg) => {
@@ -38,9 +38,9 @@ const cluster = nodes.length > 0 ? new IORedis.Cluster(nodes, {
   }
 }) : null
 
-const sse = new SSEKit({
+const sse = new SSEKify({
   redis: cluster ? clusterAdapter(cluster) : undefined,
-  channel: process.env.SSE_CHANNEL || 'ssekit:bus:cluster',
+  channel: process.env.SSE_CHANNEL || 'ssekify:bus:cluster',
   keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
   retryMs: Number(process.env.SSE_RETRY_MS || 2000),
 })

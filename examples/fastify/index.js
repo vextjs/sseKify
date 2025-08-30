@@ -1,13 +1,13 @@
 const Fastify = require('fastify')
-const { SSEKit, createIORedisAdapter } = require('../../lib')
+const { SSEKify, createIORedisAdapter } = require('../../lib')
 
 // Fastify 官方风格示例（中文注释）
-// 说明：Fastify 提供原生 res via reply.raw，可传给 SSEKit
+// 说明：Fastify 提供原生 res via reply.raw，可传给 SSEKify
 const app = Fastify()
 
-const sse = new SSEKit({
+const sse = new SSEKify({
   // redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
-  channel: process.env.SSE_CHANNEL || 'ssekit:bus',
+  channel: process.env.SSE_CHANNEL || 'ssekify:bus',
   keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
   retryMs: Number(process.env.SSE_RETRY_MS || 2000),
 })
@@ -50,11 +50,11 @@ app.get('/', async (request, reply) => {
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>sseKit Fastify 示例</title>
+  <title>ssekify Fastify 示例</title>
   <style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.6}code{background:#f6f8fa;padding:2px 4px;border-radius:4px}</style>
 </head>
 <body>
-  <h1>sseKit Fastify 示例</h1>
+  <h1>ssekify Fastify 示例</h1>
   <p>在新标签页打开 <a href="/sse?userId=alice" target="_blank" rel="noopener">/sse?userId=alice</a> 以建立 SSE 连接。</p>
   <div>
     <button id="btnNotify">向 alice 发送通知</button>

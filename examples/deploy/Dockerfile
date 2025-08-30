@@ -1,8 +1,8 @@
 # 适用于示例服务（Express/Koa/Fastify/Hapi 任一）
 # 使用：
-#   docker build -t ssekit-demo \
+#   docker build -t ssekify-demo \
 #     --build-arg EXAMPLE_PATH=examples/express/index.js .
-#   docker run -p 3000:3000 -e PORT=3000 ssekit-demo
+#   docker run -p 3000:3000 -e PORT=3000 ssekify-demo
 FROM node:18-alpine
 WORKDIR /app
 COPY package*.json ./

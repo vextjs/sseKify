@@ -1,14 +1,14 @@
 const express = require('express')
-const { SSEKit, createIORedisAdapter } = require('../../lib')
+const { SSEKify, createIORedisAdapter } = require('../../lib')
 
-// 多租户隔离示例：每个租户一个独立的 SSEKit 实例 + 独立 Redis 频道
+// 多租户隔离示例：每个租户一个独立的 SSEKify 实例 + 独立 Redis 频道
 const kits = new Map()
 function getKit(tenant) {
   if (!kits.has(tenant)) {
-    const channel = `ssekit:bus:tenant:${tenant}`
+    const channel = `ssekify:bus:tenant:${tenant}`
     const redisUrl = process.env.REDIS_URL
     const redis = redisUrl ? createIORedisAdapter?.(redisUrl) : undefined
-    const kit = new SSEKit({
+    const kit = new SSEKify({
       redis,
       channel,
       keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
@@ -28,11 +28,11 @@ app.get('/', (_req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.end(`<!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8" /><title>sseKit 多租户示例</title>
+<head><meta charset="utf-8" /><title>ssekify 多租户示例</title>
 <style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.6}code{background:#f6f8fa;padding:2px 4px;border-radius:4px}</style>
 </head>
 <body>
-  <h1>sseKit 多租户隔离示例</h1>
+  <h1>ssekify 多租户隔离示例</h1>
   <p>打开两个标签页，分别连接不同租户：</p>
   <ul>
     <li><a target="_blank" href="/t1/sse?userId=alice">租户 t1 的 SSE（alice）</a></li>

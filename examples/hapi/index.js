@@ -1,14 +1,14 @@
 const Hapi = require('@hapi/hapi')
-const { SSEKit, createIORedisAdapter } = require('../../lib')
+const { SSEKify, createIORedisAdapter } = require('../../lib')
 
 // Hapi 官方风格示例（中文注释）
 // 说明：Hapi 的原生响应对象可通过 h.raw.res 获取
 async function start() {
   const server = Hapi.server({ port: Number(process.env.PORT || 3030), host: '127.0.0.1' })
 
-  const sse = new SSEKit({
+  const sse = new SSEKify({
     // redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
-    channel: process.env.SSE_CHANNEL || 'ssekit:bus',
+    channel: process.env.SSE_CHANNEL || 'ssekify:bus',
     keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
     retryMs: Number(process.env.SSE_RETRY_MS || 2000),
   })
@@ -78,11 +78,11 @@ server.route({
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>sseKit Hapi 示例</title>
+  <title>ssekify Hapi 示例</title>
   <style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.6}code{background:#f6f8fa;padding:2px 4px;border-radius:4px}</style>
 </head>
 <body>
-  <h1>sseKit Hapi 示例</h1>
+  <h1>ssekify Hapi 示例</h1>
   <p>在新标签页打开 <a href="/sse?userId=alice" target="_blank" rel="noopener">/sse?userId=alice</a> 以建立 SSE 连接。</p>
   <div>
     <button id="btnNotify">向 alice 发送通知</button>

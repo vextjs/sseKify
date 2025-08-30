@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ssekit-express
+  name: ssekify-express
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ssekit-express
+      app: ssekify-express
   template:
     metadata:
       labels:
-        app: ssekit-express
+        app: ssekify-express
     spec:
       containers:
         - name: app
-          image: ssekit-demo:latest
+          image: ssekify-demo:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
@@ -35,10 +35,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ssekit-express
+  name: ssekify-express
 spec:
   selector:
-    app: ssekit-express
+    app: ssekify-express
   ports:
     - name: http
       port: 80

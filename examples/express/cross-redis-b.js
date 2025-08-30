@@ -1,11 +1,11 @@
 const express = require('express')
-const { SSEKit, createIORedisAdapter } = require('../../lib')
+const { SSEKify, createIORedisAdapter } = require('../../lib')
 
 // 服务器B：处理任务后通过 Redis publish 回推到共享频道
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379'
-const CHANNEL = process.env.SSE_CHANNEL || 'ssekit:bus'
+const CHANNEL = process.env.SSE_CHANNEL || 'ssekify:bus'
 
-const sse = new SSEKit({
+const sse = new SSEKify({
   redis: createIORedisAdapter ? createIORedisAdapter(REDIS_URL) : undefined,
   channel: CHANNEL,
 })

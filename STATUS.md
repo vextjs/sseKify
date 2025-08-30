@@ -1,6 +1,6 @@
 ### STATUS / ROADMAP
 
-说明：本页集中呈现 ssekit 的当前能力矩阵与路线图。状态：✅ 已实现 / 🗺️ 计划中 / ❌ 未实现。
+说明：本页集中呈现 ssekify 的当前能力矩阵与路线图。状态：✅ 已实现 / 🗺️ 计划中 / ❌ 未实现。
 
 更新（本次）：新增优雅关闭 shutdown()/stopAccepting() 与运行时 stats() 指标；心跳支持 flush。
 

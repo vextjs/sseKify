@@ -36,7 +36,7 @@ export interface RedisLike {
   close?(): Promise<void> | void
 }
 
-export interface SSEKitOptions {
+export interface SSEKifyOptions {
   // You can pass a Redis-like adapter instance or a Redis URL string
   redis?: RedisLike | string
   channel?: string
@@ -56,7 +56,7 @@ export interface RegisteredConnectionHandle {
   leave(room: string): boolean
 }
 
-export declare class SSEKit extends EventEmitter {
+export declare class SSEKify extends EventEmitter {
   stopAccepting(): void
   shutdown(opts?: { announce?: boolean; event?: string; graceMs?: number }): Promise<void>
   stats(): {
@@ -72,7 +72,7 @@ export declare class SSEKit extends EventEmitter {
     errorCount: number
   }
   clearRecent(userId?: UserId): void
-  constructor(opts?: SSEKitOptions)
+  constructor(opts?: SSEKifyOptions)
 
   registerConnection(userId: UserId, res: ServerResponse, options?: RegisterOptions): RegisteredConnectionHandle
 
@@ -90,7 +90,7 @@ export declare class SSEKit extends EventEmitter {
 export declare function createIORedisAdapter(url: string): RedisLike
 
 declare const _default: {
-  SSEKit: typeof SSEKit
+  SSEKify: typeof SSEKify
   createIORedisAdapter: typeof createIORedisAdapter
 }
 export default _default
