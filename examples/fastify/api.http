@@ -1,0 +1,41 @@
+@timestamp = {{$timestamp}}
+
+### 打开 SSE 连接（Fastify，端口 3020）
+GET http://localhost:3020/sse?userId=alice
+Accept: text/event-stream
+
+### 向 alice 发送定向通知
+POST http://localhost:3020/notify/alice
+Content-Type: application/json
+
+{
+  "msg": "hi alice (fastify)",
+  "time": "{{timestamp}}"
+}
+
+### 全员广播
+POST http://localhost:3020/broadcast
+Content-Type: application/json
+
+{
+  "msg": "broadcast from fastify",
+  "time": "{{timestamp}}"
+}
+
+### 向房间 global 发送
+POST http://localhost:3020/room/global
+Content-Type: application/json
+
+{
+  "msg": "room message (fastify)",
+  "time": "{{timestamp}}"
+}
+
+### 发布到房间 global（若已实现并配置 Redis）
+POST http://localhost:3020/publish-room/global
+Content-Type: application/json
+
+{
+  "msg": "published room message (fastify)",
+  "time": "{{timestamp}}"
+}

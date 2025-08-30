@@ -1,0 +1,41 @@
+@timestamp = {{$timestamp}}
+
+### 打开 SSE 连接（Koa，端口 3010）
+GET http://localhost:3010/sse?userId=alice
+Accept: text/event-stream
+
+### 向 alice 发送定向通知
+POST http://localhost:3010/notify/alice
+Content-Type: application/json
+
+{
+  "msg": "hi alice (koa)",
+  "time": "{{timestamp}}"
+}
+
+### 全员广播
+POST http://localhost:3010/broadcast
+Content-Type: application/json
+
+{
+  "msg": "broadcast from koa",
+  "time": "{{timestamp}}"
+}
+
+### 向房间 global 发送（如果示例路由已开启）
+POST http://localhost:3010/room/global
+Content-Type: application/json
+
+{
+  "msg": "room message (koa)",
+  "time": "{{timestamp}}"
+}
+
+### 发布到房间 global（若已实现并配置 Redis）
+POST http://localhost:3010/publish-room/global
+Content-Type: application/json
+
+{
+  "msg": "published room message (koa)",
+  "time": "{{timestamp}}"
+}

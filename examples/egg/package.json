@@ -1,0 +1,11 @@
+{
+    "name": "ssekit-egg-example",
+    "private": true,
+    "type": "commonjs",
+    "scripts": {
+        "dev": "egg-bin dev"
+    },
+    "dependencies": {
+        "egg": "^3.20.0"
+    }
+}

@@ -1,0 +1,46 @@
+# 简单的 K8s 部署样例（用于示例服务）。在生产中请根据需要调整资源/探针/亲和性等。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssekit-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssekit-express
+  template:
+    metadata:
+      labels:
+        app: ssekit-express
+    spec:
+      containers:
+        - name: app
+          image: ssekit-demo:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "3000"
+            - name: SSE_KEEPALIVE_MS
+              value: "15000"
+            - name: SSE_RETRY_MS
+              value: "2000"
+            # 如需 Redis 跨实例：
+            # - name: REDIS_URL
+            #   value: redis://default:password@redis:6379/0
+          ports:
+            - name: http
+              containerPort: 3000
+          args: ["sh","-c","node examples/express/index.js"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssekit-express
+spec:
+  selector:
+    app: ssekit-express
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+  type: ClusterIP

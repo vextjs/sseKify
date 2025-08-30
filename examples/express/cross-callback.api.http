@@ -1,0 +1,18 @@
+@timestamp = {{$timestamp}}
+
+### 启动方式（两个终端）：
+# 终端1：node examples/express/cross-callback-a.js
+# 终端2：node examples/express/cross-callback-b.js
+
+### A：打开 SSE（alice）
+GET http://localhost:3005/sse?userId=alice
+Accept: text/event-stream
+
+### A：发起任务（A -> B -> HTTP 回调 -> A 下发）
+POST http://localhost:3005/start
+Content-Type: application/json
+
+{
+  "userId": "alice",
+  "payload": { "msg": "work please", "time": "{{timestamp}}" }
+}

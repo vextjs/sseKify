@@ -1,0 +1,60 @@
+@timestamp = {{$timestamp}}
+
+### t1: 打开 SSE
+GET http://localhost:3001/t1/sse?userId=alice
+Accept: text/event-stream
+
+### t2: 打开 SSE
+GET http://localhost:3001/t2/sse?userId=alice
+Accept: text/event-stream
+
+### t1: 向 alice 发送定向通知
+POST http://localhost:3001/t1/notify/alice
+Content-Type: application/json
+
+{
+  "msg": "hi alice from t1",
+  "time": "{{timestamp}}"
+}
+
+### t2: 向 alice 发送定向通知（不会影响 t1）
+POST http://localhost:3001/t2/notify/alice
+Content-Type: application/json
+
+{
+  "msg": "hi alice from t2",
+  "time": "{{timestamp}}"
+}
+
+### t1: 全员广播（仅 t1 租户）
+POST http://localhost:3001/t1/broadcast
+Content-Type: application/json
+
+{
+  "msg": "broadcast from t1",
+  "time": "{{timestamp}}"
+}
+
+### t2: 向房间 global 发送（仅当前实例连接）
+POST http://localhost:3001/t2/room/global
+Content-Type: application/json
+
+{
+  "msg": "room message from t2",
+  "time": "{{timestamp}}"
+}
+
+### t1: 发布到房间 global（跨实例；仅 t1 频道内）
+POST http://localhost:3001/t1/publish-room/global
+Content-Type: application/json
+
+{
+  "msg": "published room message in t1",
+  "time": "{{timestamp}}"
+}
+
+### t1: 关闭 alice 连接
+POST http://localhost:3001/t1/close/alice
+Content-Type: application/json
+
+{}

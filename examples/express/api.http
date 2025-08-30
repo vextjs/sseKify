@@ -1,0 +1,47 @@
+@timestamp = {{$timestamp}}
+
+### 打开 SSE 连接（Express，端口 3000）
+GET http://localhost:3000/sse?userId=alice
+Accept: text/event-stream
+
+### 向 alice 发送定向通知
+POST http://localhost:3000/notify/alice
+Content-Type: application/json
+
+{
+  "msg": "hi alice (express)",
+  "time": "{{timestamp}}"
+}
+
+### 全员广播（跨实例需配置 Redis 并使用 publish）
+POST http://localhost:3000/broadcast
+Content-Type: application/json
+
+{
+  "msg": "broadcast from express",
+  "time": "{{timestamp}}"
+}
+
+### 向房间 global 发送（同实例）
+POST http://localhost:3000/room/global
+Content-Type: application/json
+
+{
+  "msg": "room message (express)",
+  "time": "{{timestamp}}"
+}
+
+### 发布到房间 global（如配置 Redis，可跨实例）
+POST http://localhost:3000/publish-room/global
+Content-Type: application/json
+
+{
+  "msg": "published room message (express)",
+  "time": "{{timestamp}}"
+}
+
+### 关闭 alice 的所有连接（演示）
+POST http://localhost:3000/close/alice
+Content-Type: application/json
+
+{}

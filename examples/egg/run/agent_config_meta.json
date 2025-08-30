@@ -1,0 +1,276 @@
+{
+  "cluster": {
+    "listen": {
+      "port": "/home/shihuojian/project/sseKit/examples/egg/config/config.default.js",
+      "hostname": "/home/shihuojian/project/sseKit/examples/egg/config/config.default.js",
+      "path": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    }
+  },
+  "security": {
+    "csrf": {
+      "enable": "/home/shihuojian/project/sseKit/examples/egg/config/config.default.js",
+      "type": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "ignoreJSON": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "useSession": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "cookieName": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "sessionName": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "headerName": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "bodyName": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "queryName": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "rotateWhenInvalid": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "supportedRequests": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "refererWhiteList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "cookieOptions": {
+        "signed": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+      }
+    },
+    "domainWhiteList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+    "protocolWhiteList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+    "defaultMiddleware": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+    "xframe": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "value": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "hsts": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.local.js",
+      "maxAge": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "includeSubdomains": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "dta": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "methodnoallow": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "noopen": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "nosniff": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "referrerPolicy": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "value": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "xssProtection": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "value": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "csp": {
+      "enable": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "policy": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    },
+    "ssrf": {
+      "ipBlackList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "ipExceptionList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "hostnameExceptionList": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js",
+      "checkAddress": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+    }
+  },
+  "session": {
+    "maxAge": "/home/shihuojian/project/sseKit/node_modules/egg-session/config/config.default.js",
+    "key": "/home/shihuojian/project/sseKit/node_modules/egg-session/config/config.default.js",
+    "httpOnly": "/home/shihuojian/project/sseKit/node_modules/egg-session/config/config.default.js",
+    "encrypt": "/home/shihuojian/project/sseKit/node_modules/egg-session/config/config.default.js",
+    "logValue": "/home/shihuojian/project/sseKit/node_modules/egg-session/config/config.default.js"
+  },
+  "helper": {
+    "shtml": "/home/shihuojian/project/sseKit/node_modules/egg-security/config/config.default.js"
+  },
+  "jsonp": {
+    "limit": "/home/shihuojian/project/sseKit/node_modules/egg-jsonp/config/config.default.js",
+    "callback": "/home/shihuojian/project/sseKit/node_modules/egg-jsonp/config/config.default.js",
+    "csrf": "/home/shihuojian/project/sseKit/node_modules/egg-jsonp/config/config.default.js"
+  },
+  "onerror": {
+    "errorPageUrl": "/home/shihuojian/project/sseKit/node_modules/egg-onerror/config/config.default.js",
+    "appErrorFilter": "/home/shihuojian/project/sseKit/node_modules/egg-onerror/config/config.default.js",
+    "templatePath": "/home/shihuojian/project/sseKit/node_modules/egg-onerror/config/config.default.js"
+  },
+  "i18n": {
+    "defaultLocale": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js",
+    "dirs": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js",
+    "queryField": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js",
+    "cookieField": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js",
+    "cookieDomain": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js",
+    "cookieMaxAge": "/home/shihuojian/project/sseKit/node_modules/egg-i18n/config/config.default.js"
+  },
+  "watcher": {
+    "type": "/home/shihuojian/project/sseKit/node_modules/egg-watcher/config/config.local.js",
+    "eventSources": {
+      "default": "/home/shihuojian/project/sseKit/node_modules/egg-watcher/config/config.default.js",
+      "development": "/home/shihuojian/project/sseKit/node_modules/egg-watcher/config/config.default.js"
+    }
+  },
+  "customLogger": {
+    "scheduleLogger": {
+      "consoleLevel": "/home/shihuojian/project/sseKit/node_modules/egg-schedule/config/config.default.js",
+      "file": "/home/shihuojian/project/sseKit/node_modules/egg-schedule/config/config.default.js"
+    }
+  },
+  "schedule": {
+    "directory": "/home/shihuojian/project/sseKit/node_modules/egg-schedule/config/config.default.js"
+  },
+  "multipart": {
+    "mode": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "autoFields": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "defaultCharset": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "defaultParamCharset": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "fieldNameSize": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "fieldSize": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "fields": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "fileSize": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "files": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "fileExtensions": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "whitelist": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "allowArrayField": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "tmpdir": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+    "cleanSchedule": {
+      "cron": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js",
+      "disable": "/home/shihuojian/project/sseKit/node_modules/egg-multipart/config/config.default.js"
+    }
+  },
+  "development": {
+    "watchDirs": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js",
+    "ignoreDirs": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js",
+    "fastReady": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js",
+    "reloadOnDebug": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js",
+    "overrideDefault": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js",
+    "overrideIgnore": "/home/shihuojian/project/sseKit/node_modules/egg-development/config/config.default.js"
+  },
+  "logrotator": {
+    "filesRotateByHour": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "hourDelimiter": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "filesRotateBySize": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "maxFileSize": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "maxFiles": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "rotateDuration": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js",
+    "maxDays": "/home/shihuojian/project/sseKit/node_modules/egg-logrotator/config/config.default.js"
+  },
+  "static": {
+    "prefix": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js",
+    "dir": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js",
+    "dynamic": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js",
+    "preload": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js",
+    "buffer": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js",
+    "maxFiles": "/home/shihuojian/project/sseKit/node_modules/egg-static/config/config.default.js"
+  },
+  "view": {
+    "root": "/home/shihuojian/project/sseKit/node_modules/egg-view/config/config.default.js",
+    "cache": "/home/shihuojian/project/sseKit/node_modules/egg-view/config/config.local.js",
+    "defaultExtension": "/home/shihuojian/project/sseKit/node_modules/egg-view/config/config.default.js",
+    "defaultViewEngine": "/home/shihuojian/project/sseKit/node_modules/egg-view/config/config.default.js",
+    "mapping": "/home/shihuojian/project/sseKit/node_modules/egg-view/config/config.default.js"
+  },
+  "env": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "name": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "keys": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "cookies": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "proxy": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "maxIpsCount": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "maxProxyCount": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "protocolHeaders": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "ipHeaders": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "hostHeaders": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "pkg": {
+    "name": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "private": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "type": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "scripts": {
+      "dev": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    },
+    "dependencies": {
+      "egg": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    }
+  },
+  "baseDir": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "HOME": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "rundir": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "dump": {
+    "ignore": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "timing": {
+      "slowBootActionMinDuration": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    }
+  },
+  "confusedConfigurations": {
+    "bodyparser": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "notFound": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "sitefile": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "middlewares": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "httpClient": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "notfound": {
+    "pageUrl": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "siteFile": {
+    "/favicon.ico": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "cacheControl": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "bodyParser": {
+    "enable": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "encoding": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "formLimit": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "jsonLimit": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "textLimit": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "strict": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "queryString": {
+      "arrayLimit": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "depth": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "parameterLimit": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    },
+    "onerror": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "logger": {
+    "dir": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "encoding": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "env": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "level": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "consoleLevel": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "disableConsoleAfterReady": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "outputJSON": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "buffer": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "appLogName": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "coreLogName": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "agentLogName": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "errorLogName": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "coreLogger": {
+      "consoleLevel": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.local.js"
+    },
+    "allowDebugAtProd": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "enablePerformanceTimer": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "enableFastContextLogger": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "httpclient": {
+    "enableDNSCache": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "dnsCacheLookupInterval": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "dnsCacheMaxLength": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "request": {
+      "timeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    },
+    "httpAgent": {
+      "keepAlive": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "freeSocketTimeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "maxSockets": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "maxFreeSockets": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    },
+    "httpsAgent": {
+      "keepAlive": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "freeSocketTimeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "maxSockets": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+      "maxFreeSockets": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+    },
+    "useHttpClientNext": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "meta": {
+    "enable": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "logging": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "coreMiddleware": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "workerStartTimeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "serverTimeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+  "clusterClient": {
+    "maxWaitTime": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js",
+    "responseTimeout": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+  },
+  "onClientError": "/home/shihuojian/project/sseKit/node_modules/egg/config/config.default.js"
+}

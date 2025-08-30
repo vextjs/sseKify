@@ -1,6 +1,6 @@
 {
     "name": "ssekit",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Framework-agnostic Server-Sent Events helper for Node.js with optional Redis Pub/Sub.",
     "license": "MIT",
     "author": "Your Name <you@example.com>",
@@ -14,13 +14,19 @@
     },
     "type": "commonjs",
     "main": "lib/index.js",
+    "types": "index.d.ts",
     "exports": {
-        ".": "./lib/index.js",
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./lib/index.mjs",
+            "require": "./lib/index.js"
+        },
         "./lib": "./lib/index.js",
         "./lib/redisAdapter": "./lib/redisAdapter.js"
     },
     "files": [
         "lib",
+        "index.d.ts",
         "README.md",
         "LICENSE",
         "CHANGELOG.md"
@@ -33,18 +39,37 @@
         "pubsub"
     ],
     "engines": {
-        "node": ">=14"
+        "node": ">=16"
     },
     "scripts": {
-        "dev:express": "node examples/express.js",
+        "dev:express": "node examples/express/index.js",
+        "dev:koa": "node examples/koa/index.js",
+        "dev:fastify": "node examples/fastify/index.js",
+        "dev:hapi": "node examples/hapi/index.js",
+        "dev:egg": "egg-bin dev --workers=1 --baseDir=examples/egg",
+        "dev:multi": "node examples/express/multitenant.js",
+        "dev:cross:redis:a": "node examples/express/cross-redis-a.js",
+        "dev:cross:redis:b": "node examples/express/cross-redis-b.js",
+        "dev:cross:cb:a": "node examples/express/cross-callback-a.js",
+        "dev:cross:cb:b": "node examples/express/cross-callback-b.js",
         "test": "vitest run",
         "test:watch": "vitest"
     },
-    "dependencies": {},
     "optionalDependencies": {
         "ioredis": "^5.4.1"
     },
     "devDependencies": {
-        "vitest": "^2.0.0"
+        "express": "^5.1.0",
+        "@koa/router": "^12.0.1",
+        "koa": "^2.15.3",
+        "koa-bodyparser": "^4.4.1",
+        "fastify": "^5.0.0",
+        "@hapi/hapi": "^21.3.10",
+        "egg": "^3.20.0",
+        "egg-bin": "^6.6.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2",
+        "vitest": "^2.0.0",
+        "node-fetch": "^3.3.2"
     }
 }
