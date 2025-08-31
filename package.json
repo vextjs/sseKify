@@ -3,14 +3,14 @@
     "version": "0.1.1",
     "description": "Framework-agnostic Server-Sent Events helper for Node.js with optional Redis Pub/Sub.",
     "license": "MIT",
-    "author": "Your Name <you@example.com>",
-    "homepage": "https://github.com/your-org/ssekify#readme",
+    "author": "rockyshi1993@gmail.com",
+    "homepage": "https://github.com/vextjs/sseKify#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/your-org/ssekify.git"
+        "url": "git+https://github.com/vextjs/sseKify.git"
     },
     "bugs": {
-        "url": "https://github.com/your-org/ssekify/issues"
+        "url": "https://github.com/vextjs/sseKify/issues"
     },
     "type": "commonjs",
     "main": "lib/index.js",

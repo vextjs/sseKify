@@ -1,8 +1,8 @@
 ### ssekify
 
-一个简单高效、框架无关的 Node.js Server‑Sent Events (SSE) 工具。单实例即可使用；如需横向扩展，支持通过 Redis Pub/Sub 实现跨实例消息分发。
+一个简单高效、框架无关的 Node.js Server‑Sent Events (SSE) 工具。单实例即可使用；支持横向扩展，支持通过 Redis Pub/Sub 实现跨实例消息分发。
 
-- 框架无关（Express / Koa / Fastify / Egg / Hapi 示例齐全）
+- Express / Koa / Fastify / Egg / Hapi 示例齐全
 - 支持按用户发送、全员广播、房间分发
 - 可选 Redis Pub/Sub，用于跨进程 / 跨节点分发
 - 心跳保活与轻量级重放（Last-Event-ID + 每用户最近消息缓冲；心跳在可用时会 flush）
