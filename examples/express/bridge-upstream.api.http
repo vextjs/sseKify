@@ -5,6 +5,7 @@
 # 懒连接版： node examples/express/bridge-lazy.js
 # 可选：设置上游地址（示例变量名保留）：
 #   Windows PowerShell: $env:PY_SSE_URL = "http://localhost:8000/stream"
+@timestamp = {{$timestamp}}
 
 ### 打开浏览器 SSE（需手动在浏览器中执行）
 # new EventSource('http://localhost:3000/sse?userId=alice')

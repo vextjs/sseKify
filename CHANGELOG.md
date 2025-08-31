@@ -18,11 +18,19 @@
   - HTTP 回调方案：examples/express/cross-callback-a.js、examples/express/cross-callback-b.js（配套 examples/express/cross-callback.api.http）
 - package.json 增加对应运行脚本（dev:cross:redis:a/b、dev:cross:cb:a/b）
 - README 与 STATUS 文档更新，增加“鉴权实战/运维指南/Payload 限制/重放缓冲治理”章节与示例指引；补充上游桥接示例索引
+- 新增 Egg 示例：bridge-lazy 懒连接上游（examples/egg），接入 UpstreamManager，提供 /health 健康检查与 headersProvider 支持。
+- 新增可视化 HTML 示例：
+  - Express：examples/express/bridge-lazy.js 增加首页（/），支持连接/断开、/broadcast 广播、/notify/:userId 定向与 /health 查看状态。
+  - Egg：主页（/）改为实时页面，支持连接/断开、广播/定向按钮与 /health 查询。
+- 方案 C（请求头驱动的定向转发）示例：
+  - Node 侧通过 headersProvider 注入 X-Upstream-To（环境变量 UPSTREAM_TO 控制）；
+  - Python FastAPI 上游从请求头读取并将其写入 payload.userId，示例会按 userId 定向下发。
 
 ##### Changed
 - 将 package.json engines.node 更新为 ">=16"，与 README 的原生 ESM 要求一致。
 
 ##### Fixed
+- 示例（Egg）已启用 CORS 并补充最小可用配置，修复跨源按钮请求与 SSE 连接被浏览器策略拦截的问题（启用 egg-cors 插件并配置 allowMethods/allowHeaders 等）。
 - 修复启用 Redis 时发布者实例重复分发的问题：为消息添加 origin 并在订阅端去重，本地仍即时分发以降低延迟。
 - 修复背压处理导致的重复帧：当 res.write 返回 false 时不再将当前 chunk 入队，仅等待 drain 后继续发送。
 - 修复示例对 eventsource 的导入说明，避免 “EventSource is not a constructor” 踩坑（README 补充提示；示例已采用具名导入）。

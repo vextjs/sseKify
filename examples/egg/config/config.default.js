@@ -21,5 +21,11 @@ module.exports = appInfo => {
     csrf: { enable: false },
   }
 
+  // 最小可用 CORS（示例/本地调试）：若需携带 cookie 请改为指定来源 + credentials
+    config.cors = {
+        origin: '*', // 或者 'http://localhost:3000'
+        allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
+    };
+
   return config
 }

@@ -7,4 +7,6 @@ module.exports = app => {
   router.post('/room/:room', controller.sse.room)
   router.post('/publish-room/:room', controller.sse.publishRoom)
   router.post('/close/:userId', controller.sse.close)
+  // 健康检查
+  router.get('/health', controller.sse.health)
 }

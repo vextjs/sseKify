@@ -152,7 +152,7 @@ app.listen(3000, () => console.log('Express 示例: http://localhost:3000'))
 - Express: examples/express/index.js（npm run dev:express）
 - Express（上游 SSE 源桥接 示例）：
   - 基础版：examples/express/bridge-basic.js（启动即连接上游）
-  - 懒连接版：examples/express/bridge-lazy.js（有前端连接才连接上游，空闲自动断开）
+  - 懒连接版：examples/express/bridge-lazy.js（有前端连接才连接上游，空闲自动断开；内置首页 / 用于演示“广播/定向/健康”）
   - 一键联调：examples/express/bridge-upstream.api.http
   - 注意：eventsource v4 在 CommonJS 中需使用具名导入：const { EventSource } = require('eventsource')；ESM：import { EventSource } from 'eventsource'
 - Koa: examples/koa/index.js（npm run dev:koa）
@@ -425,6 +425,18 @@ const st = sse.stats()
 ---
 
 ### 示例与一键联调
+
+#### 上游桥接快速联调（Python FastAPI SSE）
+- Python 上游示例：python/main.py（FastAPI）。安装并启动：
+  - pip install fastapi uvicorn
+  - uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+- Node 侧：
+  - Express 懒连接桥接：node examples/express/bridge-lazy.js 并打开 http://localhost:3000/ 查看 HTML 页面；点击“连接”。
+  - Egg 懒连接桥接：npx egg-bin dev 并打开 http://localhost:7001/ 查看 HTML 页面；点击“连接”。
+- 环境变量：
+  - PY_SSE_URL：自定义上游地址（默认 http://localhost:8000/stream）。
+  - UPSTREAM_TO：可选。当设置时，Node 在连接上游时会通过 headersProvider 注入请求头 X-Upstream-To，Python 会把该值写入每条事件 payload 的 userId 字段；Node 端按 userId 进行定向下发（不设置则保持广播）。
+  - 安全：不要在日志中打印敏感值；示例代码默认不会记录头部内容。
 - 示例：examples/*（Express/Koa/Fastify/Hapi/Egg、多租户、Redis Cluster/Sentinel、跨服务器推送）
 - 每个目录配有 api.http，可在 IDE 中直接发起请求验证。
 - 部署样例：examples/deploy/*（Dockerfile、K8s YAML）。
