@@ -9,11 +9,15 @@
 - 新增 Payload 限制与自定义序列化：options.serializer、options.maxPayloadBytes；序列化异常与超限将通过 'error' 事件报告。
 - 新增 重放缓冲治理：options.recentTTLMs、options.recentMaxUsers、sse.clearRecent(userId?)，按 TTL 与 LRU 自动清理。
 - 初始房间修复：registerConnection(options.rooms) 会立即加入全局房间映射。
+- 新增上游 SSE 源桥接示例（Express）：
+  - 基础版：examples/express/bridge-basic.js（启动即连接上游）
+  - 懒连接版：examples/express/bridge-lazy.js（有前端连接才连接上游，空闲自动断开）
+  - 一键联调：examples/express/bridge-upstream.api.http
 - 新增跨服务器推送完整示例（Express）：
   - Redis 回推方案：examples/express/cross-redis-a.js、examples/express/cross-redis-b.js（配套 examples/express/cross-redis.api.http）
   - HTTP 回调方案：examples/express/cross-callback-a.js、examples/express/cross-callback-b.js（配套 examples/express/cross-callback.api.http）
 - package.json 增加对应运行脚本（dev:cross:redis:a/b、dev:cross:cb:a/b）
-- README 与 STATUS 文档更新，增加“鉴权实战/运维指南/Payload 限制/重放缓冲治理”章节与示例指引
+- README 与 STATUS 文档更新，增加“鉴权实战/运维指南/Payload 限制/重放缓冲治理”章节与示例指引；补充上游桥接示例索引
 
 ##### Changed
 - 将 package.json engines.node 更新为 ">=16"，与 README 的原生 ESM 要求一致。
@@ -21,6 +25,7 @@
 ##### Fixed
 - 修复启用 Redis 时发布者实例重复分发的问题：为消息添加 origin 并在订阅端去重，本地仍即时分发以降低延迟。
 - 修复背压处理导致的重复帧：当 res.write 返回 false 时不再将当前 chunk 入队，仅等待 drain 后继续发送。
+- 修复示例对 eventsource 的导入说明，避免 “EventSource is not a constructor” 踩坑（README 补充提示；示例已采用具名导入）。
 
 ##### Deprecated
 - （预留）

@@ -43,6 +43,8 @@
     },
     "scripts": {
         "dev:express": "node examples/express/index.js",
+        "dev:bridge:basic": "node examples/express/bridge-basic.js",
+        "dev:bridge:lazy": "node examples/express/bridge-lazy.js",
         "dev:koa": "node examples/koa/index.js",
         "dev:fastify": "node examples/fastify/index.js",
         "dev:hapi": "node examples/hapi/index.js",
@@ -59,17 +61,18 @@
         "ioredis": "^5.4.1"
     },
     "devDependencies": {
-        "express": "^5.1.0",
-        "@koa/router": "^12.0.1",
-        "koa": "^2.15.3",
-        "koa-bodyparser": "^4.4.1",
-        "fastify": "^5.0.0",
         "@hapi/hapi": "^21.3.10",
+        "@koa/router": "^12.0.1",
         "egg": "^3.20.0",
         "egg-bin": "^6.6.0",
+        "eventsource": "^4.0.0",
+        "express": "^5.1.0",
+        "fastify": "^5.0.0",
+        "koa": "^2.15.3",
+        "koa-bodyparser": "^4.4.1",
+        "node-fetch": "^3.3.2",
         "ts-node": "^10.9.2",
         "typescript": "^5.6.2",
-        "vitest": "^2.0.0",
-        "node-fetch": "^3.3.2"
+        "vitest": "^2.0.0"
     }
 }

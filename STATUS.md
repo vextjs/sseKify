@@ -2,7 +2,7 @@
 
 说明：本页集中呈现 ssekify 的当前能力矩阵与路线图。状态：✅ 已实现 / 🗺️ 计划中 / ❌ 未实现。
 
-更新（本次）：新增优雅关闭 shutdown()/stopAccepting() 与运行时 stats() 指标；心跳支持 flush。
+更新（本次）：新增优雅关闭 shutdown()/stopAccepting() 与运行时 stats() 指标；心跳支持 flush。新增上游 SSE 源桥接 Express 示例（examples/express/bridge-basic.js、bridge-lazy.js）。
 
 #### 能力矩阵
 - 连接管理：

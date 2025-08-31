@@ -150,6 +150,11 @@ app.listen(3000, () => console.log('Express 示例: http://localhost:3000'))
 
 ### 更多框架最小示例
 - Express: examples/express/index.js（npm run dev:express）
+- Express（上游 SSE 源桥接 示例）：
+  - 基础版：examples/express/bridge-basic.js（启动即连接上游）
+  - 懒连接版：examples/express/bridge-lazy.js（有前端连接才连接上游，空闲自动断开）
+  - 一键联调：examples/express/bridge-upstream.api.http
+  - 注意：eventsource v4 在 CommonJS 中需使用具名导入：const { EventSource } = require('eventsource')；ESM：import { EventSource } from 'eventsource'
 - Koa: examples/koa/index.js（npm run dev:koa）
 - Fastify: examples/fastify/index.js（npm run dev:fastify）
 - Hapi: examples/hapi/index.js（npm run dev:hapi）

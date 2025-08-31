@@ -1,0 +1,34 @@
+# Examples for upstream SSE bridge (Express)
+# Power by IDE HTTP Client / VSCode REST Client
+# 使用前请先启动示例：
+# 基础版：   node examples/express/bridge-basic.js
+# 懒连接版： node examples/express/bridge-lazy.js
+# 可选：设置上游地址（示例变量名保留）：
+#   Windows PowerShell: $env:PY_SSE_URL = "http://localhost:8000/stream"
+
+### 打开浏览器 SSE（需手动在浏览器中执行）
+# new EventSource('http://localhost:3000/sse?userId=alice')
+
+### 健康检查（仅懒连接版提供）
+GET http://localhost:3000/health
+
+### 向指定用户发送（需另开浏览器连接 alice）
+POST http://localhost:3000/notify/alice
+Content-Type: application/json
+
+{ "msg": "hi alice", "at": "{{timestamp}}" }
+
+### 全体广播
+POST http://localhost:3000/broadcast
+Content-Type: application/json
+
+{ "msg": "hello everyone", "at": "{{timestamp}}" }
+
+### 向房间 global 发送
+POST http://localhost:3000/room/global
+Content-Type: application/json
+
+{ "room": "global", "msg": "hi room" }
+
+### 关闭用户 alice 的所有连接
+POST http://localhost:3000/close/alice
