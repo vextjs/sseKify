@@ -1,9 +1,12 @@
 const index = require('express')
+const cors = require('cors');
+
 const { SSEKify, createIORedisAdapter } = require('../../lib')
 
 // 简单的 Express 示例，展示如何接入 ssekify
 const app = index()
 app.use(index.json())
+app.use(cors());
 
 // 创建 SSEKify 实例
 // 提示：若需跨实例（多进程/多节点）分发消息，可配置 Redis 适配器

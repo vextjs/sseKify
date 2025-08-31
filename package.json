@@ -63,6 +63,7 @@
     "devDependencies": {
         "@hapi/hapi": "^21.3.10",
         "@koa/router": "^12.0.1",
+        "cors": "^2.8.5",
         "egg": "^3.20.0",
         "egg-bin": "^6.6.0",
         "egg-cors": "^3.0.1",
