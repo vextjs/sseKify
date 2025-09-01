@@ -2,6 +2,7 @@ const Koa = require('koa')
 const Router = require('@koa/router')
 const bodyParser = require('koa-bodyparser')
 const { SSEKify, createIORedisAdapter } = require('../../lib')
+const { PassThrough } = require("stream");
 
 // Koa 官方风格示例（中文注释）
 // 说明：Koa 的 ctx.res 是原生 Node 的 ServerResponse，可直接传给 SSEKify
@@ -10,52 +11,51 @@ const router = new Router()
 app.use(bodyParser())
 
 const sse = new SSEKify({
-  // 可选：跨实例分发
-  // redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
-  channel: process.env.SSE_CHANNEL || 'ssekify:bus',
-  keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
-  retryMs: Number(process.env.SSE_RETRY_MS || 2000),
+    // 可选：跨实例分发
+    // redis: process.env.REDIS_URL && createIORedisAdapter(process.env.REDIS_URL),
+    channel: process.env.SSE_CHANNEL || 'ssekify:bus',
+    keepAliveMs: Number(process.env.SSE_KEEPALIVE_MS || 15000),
+    retryMs: Number(process.env.SSE_RETRY_MS || 2000),
 })
 
 // 建立 SSE 连接（保持长连接）
 router.get('/sse', async (ctx) => {
-  const userId = String(ctx.query.userId || 'guest')
-  // 注意：不要提前向 ctx.res 写入/flush 头部，交由 SSEKify 处理
-  sse.registerConnection(userId, ctx.res, { rooms: ['global'] })
-  // Koa 默认会继续后续中间件并尝试写入，这里需告知 Koa 响应已由我们接管
-  ctx.respond = false
+    ctx.body = new PassThrough();
+    const userId = String(ctx.query.userId || 'guest')
+    sse.registerConnection(userId, ctx.res, { rooms: ['global'] })
+    ctx.body.write(`data: ${new Date()}\n\n`);
 })
 
 router.post('/notify/:userId', async (ctx) => {
-  const delivered = sse.sendToUser(ctx.params.userId, ctx.request.body, { event: 'notify' })
-  ctx.body = { delivered }
+    const delivered = sse.sendToUser(ctx.params.userId, ctx.request.body, { event: 'notify' })
+    ctx.body = { delivered }
 })
 
 router.post('/broadcast', async (ctx) => {
-  await sse.publish(ctx.request.body, undefined, { event: 'broadcast' })
-  ctx.body = { ok: true }
+    await sse.publish(ctx.request.body, undefined, { event: 'broadcast' })
+    ctx.body = { ok: true }
 })
 
 router.post('/room/:room', async (ctx) => {
-  const count = sse.sendToRoom(ctx.params.room, ctx.request.body, { event: 'room' })
-  ctx.body = { delivered: count }
+    const count = sse.sendToRoom(ctx.params.room, ctx.request.body, { event: 'room' })
+    ctx.body = { delivered: count }
 })
 
 router.post('/publish-room/:room', async (ctx) => {
-  await sse.publishToRoom(ctx.params.room, ctx.request.body, { event: 'room' })
-  ctx.body = { ok: true }
+    await sse.publishToRoom(ctx.params.room, ctx.request.body, { event: 'room' })
+    ctx.body = { ok: true }
 })
 
 // 关闭指定用户的所有连接（演示用）
 router.post('/close/:userId', async (ctx) => {
-  sse.close(ctx.params.userId)
-  ctx.body = { closed: true }
+    sse.close(ctx.params.userId)
+    ctx.body = { closed: true }
 })
 
 // 简易首页
 router.get('/', async (ctx) => {
-  ctx.set('Content-Type', 'text/html; charset=utf-8')
-  ctx.body = `<!doctype html>
+    ctx.set('Content-Type', 'text/html; charset=utf-8')
+    ctx.body = `<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />

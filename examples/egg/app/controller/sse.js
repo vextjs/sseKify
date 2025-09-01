@@ -1,6 +1,7 @@
 'use strict'
 
 const { Controller } = require('egg')
+const { PassThrough } = require("stream");
 
 class SseController extends Controller {
     // 首页：带可视化 HTML（连接/断开、广播、定向、健康）
@@ -136,41 +137,10 @@ class SseController extends Controller {
 </html>`
     }
 
-    async stream1() {
-        const { ctx } = this;
-
-        // SSE 头设置
-        ctx.set({
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*', // 跨域
-        });
-
-        ctx.status = 200;
-
-        let count = 0;
-        const intervalId = setInterval(() => {
-            count++;
-            // 发送数据给客户端
-            ctx.res.write(`data: ${JSON.stringify({ message: 'Hello SSE', count })}\n\n`);
-
-            // 假设发送10次后关闭
-            if (count >= 10) {
-                clearInterval(intervalId);
-                ctx.res.end();
-            }
-        }, 1000);
-
-        // 客户端断开连接时清理
-        ctx.req.on('close', () => {
-            clearInterval(intervalId);
-        });
-    }
-
     // SSE 长连接入口：进入时 +1，关闭时 -1（触发 UpstreamManager 懒连接/空闲关闭）
     async stream() {
         const { ctx, app } = this
+        ctx.body = new PassThrough();
         const userId = String(ctx.query.userId || 'guest')
 
         // // 有新下游连接时，增加引用计数
@@ -178,12 +148,12 @@ class SseController extends Controller {
 
         // 注册下游连接
         app.sse.registerConnection(userId, ctx.res, { rooms: ['global'] })
-        ctx.respond = false
 
         // 断开时清理
         ctx.res.on('close', () => {
             app.upstream && app.upstream.removeClientRef()
         })
+        ctx.body.write(`data: ${new Date()}\n\n`);
     }
 
     // 单用户推送
