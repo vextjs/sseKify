@@ -139,7 +139,7 @@ app.listen(3000, () => console.log('Express 示例: http://localhost:3000'))
 </script>
 ```
 
-一键联调文件（IDE HTTP Client）：examples/express/api.http  
+一键联调文件（IDE HTTP Client）：examples/express/api.http
 常见踩坑与建议：
 - 不要在 registerConnection 前 flush/写头；不要在 SSE 响应上再用 res.json/res.end；
 - 对 /sse 路由禁用压缩与代理缓冲（Nginx: proxy_buffering off；或 X-Accel-Buffering: no）；
@@ -397,8 +397,19 @@ await sse.shutdown({ announce: true, event: 'server:shutdown', graceMs: 5000 })
 - 指标：
 ```js
 const st = sse.stats()
-// { connections, users, rooms, sent, droppedOldest, droppedNewest, disconnectedByBackpressure, queueItemsMax, queueBytesMax, errorCount }
+// {
+//   connections, users, rooms,
+//   sent, droppedOldest, droppedNewest, disconnectedByBackpressure,
+//   queueItemsMax, queueBytesMax, errorCount,
+//   // 新增：seq 相关指标（用于观测是否启用了全局单调、自增来源等）
+//   seqIncrsLocal,           // 使用本地内存自增的次数（单实例或 KV 不可用时）
+//   seqIncrsRedis,           // 使用 Redis INCR 的次数（启用 KV 时）
+//   lastSeqKvFallbackAt      // 最近一次从 KV 继承失败并回退为内存自增的时间戳（epochMs；0 表示从未发生）
+// }
 ```
+- 说明：
+  - 当检测到 Redis 适配器不具备 KV 能力时，库会回退为“内存自增”并仅触发一次告警事件，错误对象将带有 `code = 'SEQ_KV_FALLBACK'` 且 `level = 'warn'`；功能不受影响，但对同一键仅能保证“每实例单调”。
+  - 需要“全局单调”时，请使用带 KV 的 `createIORedisAdapter(REDIS_URL)`（或显式传入 KV 客户端）。
 - 说明：若 Redis 适配器实现了 close()，shutdown 会在断开所有连接后调用 redis.close()。
 
 ---
@@ -464,3 +475,167 @@ const st = sse.stats()
 - 示例索引 → [示例与一键联调](#示例与一键联调)
 - API → [API 参考](#api-参考)
 - 运维 → [代理/网关与部署](#代理网关与部署) | [优雅关闭与运行时指标](#优雅关闭与运行时指标)
+
+---
+
+### 新增能力（自动 timestamp / 自动 seq 与 Redis KV 继承）
+
+本版本在不改变既有 API 的前提下，新增了两项“默认开启、按需生效”的能力，用于提升断线重连后的稳定性与顺序保障：
+
+- 自动注入 timestamp（发送时刻）
+  - 默认启用；当数据体未包含 `timestamp` 时，发送前自动注入 ISO 8601（UTC）时间戳。
+  - 可通过构造参数 `autoFields.timestamp` 配置为 `'iso' | 'epochMs' | false`。
+- 自动注入 seq（业务序号）
+  - 默认启用；当且仅当数据体包含 `requestId`（任务流）或 `streamId`（主题流）时，按该键作用域自增；已有 `seq` 不覆盖。
+  - 单实例：进程内内存自增（O(1)）；
+  - 多实例：若 Redis 适配器具备 KV 能力（见下），将自动继承以 `INCR/EXPIRE` 实现“全局单调”；否则回退为内存自增并打印一次告警（不影响功能）。
+  - 可选为 SSE 帧自动生成 `id`（传输层）：`seq.frameIdPolicy = 'timestamp' | ((data, nextSeq)=>string)`，便于 Last-Event-ID 补发对齐。
+
+此外，`createIORedisAdapter` 已增强：在 Pub/Sub 之外新增独立 KV 连接（不与 SUBSCRIBE 复用），并在适配器上暴露可选 KV API：`incr/expire/pexpire` 与 `kv` 句柄。SSEKify 会在构造时“半自动继承”该能力用于 `seq` 的全局单调：
+
+- 仅传一次 `redis: createIORedisAdapter(REDIS_URL)` 即可，同时获得“跨实例发布 + 全局单调 seq”。
+- 若适配器缺少 KV，则自动回退为内存自增（每实例单调）并打印一次警告（代码：`seq_kv_unavailable_fallback_memory`）。
+
+> 向后兼容：未带 `requestId/streamId` 的消息不注入 `seq`；已有 `seq/timestamp` 的消息保持原样；`sendTo*`/`publish*` 等 API 签名与行为不变。
+
+---
+
+### 快速示例：单实例与“一次性配置 Redis”
+
+```js
+const express = require('express')
+const { SSEKify, createIORedisAdapter } = require('ssekify')
+
+const app = express(); app.use(express.json())
+
+// 单实例：开箱可用（自动 timestamp + 自动 seq〔作用域=requestId 或 streamId〕）
+const sse = new SSEKify({ recentBufferSize: 20 })
+
+// 多实例（推荐）：一次性配置 Redis（跨实例发布 + 自动继承 KV 实现 seq 全局单调）
+// const sse = new SSEKify({
+//   redis: createIORedisAdapter(process.env.REDIS_URL),
+//   channel: 'ssekify:bus',
+//   recentBufferSize: 50,
+//   seq: { frameIdPolicy: 'timestamp' } // 可选：同时为帧生成 id，配合 Last-Event-ID 补发
+// })
+
+app.get('/sse', (req, res) => {
+  const userId = String(req.query.userId || 'guest')
+  sse.registerConnection(userId, res, { rooms: ['global'] })
+})
+
+// 任务型消息：仅需携带 requestId；库会自动补 timestamp 与 seq（已有 seq 不覆盖）
+sse.sendToUser('u1', {
+  traceId: '...',                 // 由业务侧生成/透传（可在 autoFields 中配置 ifMissing）
+  requestId: 'req_123',           // 作用域键（推荐）
+  phase: 'progress', type: 'trip.plan@v1',
+  payload: { percent: 40, message: '拉取报价…' }
+}, { event: 'notify' })
+
+// 主题广播需要严格顺序时：提供 streamId
+await sse.publish({
+  streamId: 'price.reco:city:SHA',
+  type: 'price.reco@v1',
+  payload: { hotelId: 'h_123', recos: [] }
+}, undefined, { event: 'broadcast' }) // 第二参 undefined ⇒ 跨实例广播
+```
+
+---
+
+### API 新增与配置（节选）
+
+- 构造参数新增（示例，JavaScript）：
+```js
+const sse = new SSEKify({
+  // 自动字段（默认仅启用 timestamp）
+  autoFields: {
+    // 'iso' | 'epochMs' | false
+    timestamp: 'iso',
+    // 可选：当缺失时补齐（谨慎使用）
+    // traceId:   { mode: 'ifMissing', getter: () => getTraceId(), fieldName: 'traceId' },
+    // requestId: { mode: 'require' } // 缺失时抛错，或使用 { mode:'ifMissing', getter: () => crypto.randomUUID() }
+  },
+
+  // 自动 seq（默认启用、按需生效）
+  enableSeq: true,
+  seq: {
+    // keyExtractor: d => d && (d.requestId || d.streamId), // 作用域键（默认如此）
+    startAt: 0,                // 首帧 0，之后 +1
+    // finalPredicate: d => d && (d.final === true || d.phase === 'done' || d.phase === 'error'),
+    fieldName: 'seq',
+    // 为帧自动生成 id（可选）：'timestamp' 或函数 (data, nextSeq) => string
+    // frameIdPolicy: 'timestamp',
+    // 半自动：若未显式提供，SSEKify 将尝试从顶层 redis 适配器继承 KV；失败回退内存并一次性告警
+    // redis: kvClient,
+    redisKeyPrefix: 'ssekify:seq:',
+    redisTTLSeconds: 86400
+  }
+})
+```
+
+- Redis 适配器（`createIORedisAdapter`）增强：
+  - 适配器内部维护 `pub/sub/kv` 三连接；在对象上可选暴露 `incr/expire/pexpire/kv`；
+  - `SSEKify` 在构造时会尝试自动继承该 KV 作为 `seq` 的全局自增源。
+
+- RedisLike 接口（可选 KV 能力，伪代码）：
+```txt
+publish(channel, message)
+subscribe(channel)
+on('message'|'error', cb)
+close()? // 可选
+// KV 能力可选：
+incr(key)?
+expire(key, seconds)?
+pexpire(key, ms)?
+kv?: { incr, expire, pexpire }
+```
+
+---
+
+### 帧 id 策略（frameIdPolicy）
+
+- 用途：SSE 帧 `id` 用于浏览器重连时的 `Last-Event-ID` 对齐（传输层）。与业务层 `seq` 互补。
+- 默认策略：`'timestamp'`，但注意本库实现的是“复合 ID”，格式：`<epochMs>-<instanceId>-<seq>`，以降低高吞吐时同毫秒碰撞概率。
+- 自定义函数策略：可根据业务需要自行生成可排序、低碰撞的 ID：
+```js
+const sse = new SSEKify({
+  seq: {
+    frameIdPolicy: (data, nextSeq) => `${Date.now()}-${process.pid}-${nextSeq}-${Math.random().toString(36).slice(2,6)}`
+  }
+})
+```
+- 高吞吐建议：
+  - 若需要跨实例强顺序与稳定补发，推荐使用函数策略或内置 `'snowflake'`（未来版本提供），确保“时间戳 + 实例号 + 递增计数”的组合；
+  - 同时开启 `recentBufferSize > 0`，浏览器断线后可通过 `Last-Event-ID` 精确补发；
+  - 业务层仍使用 `requestId/streamId + seq` 保证流内有序与去重。
+
+---
+
+### 行为矩阵（单机/多实例 × KV）
+
+- 无 `redis`：
+  - `publish` 仅本实例；
+  - `seq` 为内存自增（每实例独立单调）。
+- 配置了 `redis`（且适配器具备 KV）：
+  - `publish` 跨实例；
+  - `seq` 使用 Redis `INCR/EXPIRE`，对同一键“全局单调”。
+- 配置了 `redis`（但适配器不具备 KV）：
+  - `publish` 跨实例；
+  - `seq` 回退内存自增（打印一次警告，代码：`seq_kv_unavailable_fallback_memory`）。
+
+---
+
+### FAQ（选摘）
+
+- 自动注入会影响旧项目吗？
+  - 不会。未带 `requestId/streamId` 的消息不注入 `seq`；已有 `seq/timestamp` 不覆盖；API 与写出路径不变。
+- 我需要严格的全局顺序吗？
+  - 多实例并发对同一任务/主题发送时，建议使用带 KV 的 Redis 适配器（或显式提供 KV 客户端）以启用 `INCR` 全局单调；否则仅保证各实例内单调。
+- 帧 `id` 与 `seq` 有何区别？
+  - 帧 `id` 属于传输层（用于 Last-Event-ID 补发定位）；`seq` 属于业务层（按任务/主题自增序号，用于去重与按序）。
+- `snowflake` 怎么用？
+  - 目前建议使用函数策略：`frameIdPolicy: (data, nextSeq) => yourSnowflake()`；或直接使用 `'timestamp'`。
+- 看到 `SEQ_KV_FALLBACK` 告警怎么办？
+  - 语义：未能从 Redis 适配器继承 KV 能力（INCR/EXPIRE），`seq` 回退为内存自增（每实例单调）。该告警只会触发一次，错误对象将包含 `code='SEQ_KV_FALLBACK'`、`level='warn'`。
+  - 排查：确认是否使用了 `createIORedisAdapter(REDIS_URL)` 或为 `seq.redis` 显式提供了 KV 客户端；检查网络与权限（Cluster/Sentinel/TLS/ACL）。
+  - 影响：功能不受影响；仅在多实例并发对同一键发送时，无法保证“全局单调”。需要强保证时，请启用带 KV 的适配器或将同一键粘滞到同一实例赋号。

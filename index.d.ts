@@ -34,6 +34,29 @@ export interface RedisLike {
   subscribe(channel: string): Promise<void> | void
   on(event: 'message' | 'error', cb: any): void
   close?(): Promise<void> | void
+  // Optional KV capabilities for seq (if provided, sseKify will auto-inherit)
+  incr?(key: string): Promise<number>
+  expire?(key: string, seconds: number): Promise<number>
+  pexpire?(key: string, ms: number): Promise<number>
+  kv?: { incr: (k: string) => Promise<number>; expire: (k: string, s: number) => Promise<number>; pexpire: (k: string, ms: number) => Promise<number> }
+}
+
+export interface AutoFieldsOptions {
+  timestamp?: 'iso' | 'epochMs' | false
+  traceId?: { mode: 'off' | 'ifMissing'; getter?: () => string; fieldName?: string }
+  requestId?: { mode: 'off' | 'ifMissing' | 'require'; getter?: () => string; fieldName?: string }
+}
+
+export interface SeqOptions {
+  keyExtractor?: (d: any) => string | undefined
+  startAt?: 0 | 1
+  finalPredicate?: (d: any) => boolean
+  fieldName?: string
+  frameIdPolicy?: 'none' | 'timestamp' | 'snowflake' | ((d: any, nextSeq: number) => string)
+  // KV store for global monotonic seq; if omitted, sseKify will try to inherit from top-level redis adapter
+  redis?: { incr: (k: string) => Promise<number>; expire?: (k: string, s: number) => Promise<number> } | null
+  redisKeyPrefix?: string
+  redisTTLSeconds?: number
 }
 
 export interface SSEKifyOptions {
@@ -47,6 +70,11 @@ export interface SSEKifyOptions {
   maxPayloadBytes?: number
   recentTTLMs?: number
   recentMaxUsers?: number
+
+  // New: automatic field injection and seq
+  autoFields?: AutoFieldsOptions
+  enableSeq?: boolean
+  seq?: SeqOptions
 }
 
 export interface RegisteredConnectionHandle {
@@ -70,6 +98,10 @@ export declare class SSEKify extends EventEmitter {
     queueItemsMax: number
     queueBytesMax: number
     errorCount: number
+    // New metrics (since vX.Y.Z):
+    seqIncrsLocal: number
+    seqIncrsRedis: number
+    lastSeqKvFallbackAt: number
   }
   clearRecent(userId?: UserId): void
   constructor(opts?: SSEKifyOptions)
