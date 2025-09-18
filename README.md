@@ -24,6 +24,7 @@
 - [重放缓冲治理（Last-Event-ID / TTL / LRU / clearRecent）](#重放缓冲治理last-event-id--ttl--lru--clearrecent)
 - [鉴权实战](#鉴权实战)
 - [跨服务器推送（两种方案）](#跨服务器推送两种方案)
+- [与 vsse 协同（postAndListen）](#与-vsse-协同postandlisten)
 - [多租户隔离](#多租户隔离)
 - [Redis 高可用（Cluster/Sentinel）](#redis-高可用clustersentinel)
 - [代理/网关与部署](#代理网关与部署)
@@ -328,6 +329,18 @@ app.get('/sse', authFromQuery, (req,res)=>{
 ---
 
 ### 跨服务器推送（两种方案）
+
+#### 本地直推 vs 跨实例发布（如何选择）
+- sendToUser(userId, data, opts)：仅把消息写入“当前实例上属于该用户的连接”。不依赖 Redis，不能自动跨实例。
+- publish(data, userId|undefined, opts)：经 Redis Pub/Sub 跨实例分发，最终由“真正持有该用户连接的实例”写入 SSE 连接；未配置 Redis 时仅在本机生效。
+
+选择指南：
+- 单实例部署，或确认浏览器连接一定落在当前实例（如粘滞会话）→ 用 sendToUser/sendToAll/sendToRoom。
+- 入口层（Ingress/LB 前的边车或网关）承接连接、业务服务在内网处理并回推 → 统一用 publish（单用户或全体广播皆可）。
+
+注意：publish 是 Pub/Sub 分发，不是“缓存/持久化”；订阅端离线期间的消息不会补发。如需可靠投递/重放，请引入数据库/队列或 Redis Streams。
+
+#### 两种跨服务器方案
 - 方案一：Redis Pub/Sub（推荐，适合多实例/弹性扩展）
     - A 持有客户端连接；B 处理后 `sse.publish(data, userId, {event})` 回推共享频道；A 订阅后自动下发给对应用户。
     - 示例：examples/express/cross-redis-a.js（端口 3004）与 examples/express/cross-redis-b.js（端口 4004）
@@ -336,6 +349,20 @@ app.get('/sse', authFromQuery, (req,res)=>{
     - A 持有连接并暴露 /fanout；B 完成后 POST 回调到 A；A 本地下发给用户。
     - 示例：examples/express/cross-callback-a.js（端口 3005）与 examples/express/cross-callback-b.js（端口 4005）
     - 一键联调：examples/express/cross-callback.api.http
+
+### 与 vsse 协同（postAndListen）
+- 事件名一致：若前端 SSEClient({ eventName: 'notify' })，服务端发送时也应 { event: 'notify' }；默认均为 'message'。
+- requestId 对齐：在 data JSON 顶层包含本次调用的 requestId，前端才能将消息路由到对应回调。
+- 阶段建议：phase 使用 'progress' | 'done' | 'error'；前端在 done/error 时会自动取消该 requestId 的监听。
+
+示例（业务服务不持有连接，仅发布；入口服务持有连接并订阅 Redis）：
+```js
+// 业务服务（仅发布）
+await sse.publish({ requestId, phase: 'progress', type: 'chat', payload: { content: chunk } }, userId, { event: 'notify' })
+await sse.publish({ requestId, phase: 'done',     payload: { content, length: content.length } }, userId, { event: 'notify' })
+// 出错：
+await sse.publish({ requestId, phase: 'error',    error: { code: 'UpstreamOrDbError', message: err.message } }, userId, { event: 'notify' })
+```
 
 ---
 
@@ -373,6 +400,15 @@ function getKit(tenant){
 - 对 /sse 路由禁用压缩与缓冲（Nginx: `proxy_buffering off` 或返回 `X-Accel-Buffering: no`）。
 - keepAliveMs 小于负载均衡/代理空闲超时。
 - 心跳会在可用时 `res.flush()`，确保事件及时穿透代理。
+
+#### 入口承接连接拓扑（Ingress/LB 终止，推荐多实例）
+- 入口服务：暴露 /sse 并调用 registerConnection(userId, res)；如需跨实例，配置相同的 Redis 与 channel 进行订阅。
+- 业务服务：不 registerConnection；完成任务后统一用 publish(data, userId, { event }) 将消息发布到 Redis。
+- Redis：仅需内网可达；不必对公网开放；建议配置密码/ACL，必要时启用 TLS。
+- 常见误区：
+  - 业务服务使用 sendToUser → 若该服务并不持有该用户连接，消息不会被任何客户端收到。请改用 publish。
+  - publish 被当作“缓存/持久化”使用 → Redis Pub/Sub 是瞬时分发，订阅端离线期间消息不会补发。
+
 - Docker 构建并运行（以 Express 示例为例）：
 ```bash
 docker build -t ssekify-demo --build-arg EXAMPLE_PATH=examples/express/index.js -f examples/deploy/Dockerfile .
@@ -432,6 +468,14 @@ const st = sse.stats()
     - 解决：不要在 registerConnection 前调用 res.flushHeaders()；必要时可在注册后再调用。库对 headersSent=true 有容错，会跳过重复设置头，但仍建议避免提前 flush。
 - 已建立 SSE 后不要再对该响应调用 res.json / res.end。
 - Last-Event-ID 获取：默认从请求头读取；若不便设置请求头，也支持查询参数 ?lastEventId=...
+
+- 使用了 publish，但前端收不到？
+  - 自检三点：
+    1) 入口与业务是否都指向同一 Redis，且 channel 一致；
+    2) 浏览器的 SSE 是否连到了持有连接的入口服务；
+    3) 服务端发送的 event 是否与前端 eventName 一致，且 data 内是否包含正确的 requestId（对 postAndListen 而言）。
+- 为什么我用 sendToUser 没人收到？
+  - sendToUser 只作用于“当前实例持有的连接”。若连接在另一台实例或入口服务上，请改用 publish（并保证两侧 Redis/channel 一致）。
 
 ---
 
