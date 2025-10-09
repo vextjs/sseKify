@@ -41,6 +41,7 @@
 ### 特性总览
 - 单实例/跨实例推送（Redis Pub/Sub）
 - 用户/全体/房间维度发送
+- **用户连接数统计（实时获取指定用户连接数、连接ID列表、在线状态）**
 - Last-Event-ID 重放与每用户最近消息缓冲（支持 TTL/LRU 治理）
 - 心跳注释行 + 可用时自动 flush
 - 每连接写队列 + drain 背压（队列条数/字节上限、丢弃策略）
@@ -248,6 +249,35 @@ const sse = new SSEKify({ redis: createIORedisAdapter('redis://localhost:6379') 
     - 跨实例发布到房间：所有实例中加入该房间的连接都会收到。
 - close(userId?): void
     - 关闭指定用户的所有连接；不传 userId 则关闭全部（谨慎操作）。
+
+#### 用户连接数统计方法（新增）
+- getUserConnectionCount(userId: string): number
+    - 获取指定用户的连接数量。返回该用户当前活跃连接数，如果用户不存在或 userId 无效则返回 0。
+- getUserConnectionIds(userId: string): string[]
+    - 获取指定用户的所有连接ID列表。返回该用户所有活跃连接的连接ID数组。
+- getAllUsersConnectionStats(): Record<string, number>
+    - 获取所有用户的连接统计信息。返回用户ID到连接数的映射对象，如 `{ "alice": 2, "bob": 1 }`。
+- isUserOnline(userId: string): boolean
+    - 检查用户是否在线（至少有一个活跃连接）。返回布尔值表示用户在线状态。
+
+#### 使用示例：
+```js
+// 获取用户连接数
+const count = sse.getUserConnectionCount('alice')
+console.log(`用户 alice 的连接数: ${count}`)
+
+// 发送消息前检查用户状态
+if (sse.isUserOnline('alice')) {
+    const sentCount = sse.sendToUser('alice', { message: 'Hello!' })
+    console.log(`消息已发送到 ${sentCount} 个连接`)
+} else {
+    console.log('用户不在线')
+}
+
+// 获取所有用户统计
+const allStats = sse.getAllUsersConnectionStats()
+console.log('在线用户统计:', allStats) // { "alice": 2, "bob": 1 }
+```
 
 - stopAccepting(): void
     - 停止接受新连接（现有连接保持）。常见于滚动发布前的准备阶段。
@@ -597,7 +627,7 @@ const sse = new SSEKify({
     timestamp: 'iso',
     // 可选：当缺失时补齐（谨慎使用）
     // traceId:   { mode: 'ifMissing', getter: () => getTraceId(), fieldName: 'traceId' },
-    // requestId: { mode: 'require' } // 缺失时抛错，或使用 { mode:'ifMissing', getter: () => crypto.randomUUID() }
+    // requestId: { mode:'require' } // 缺失时抛错，或使用 { mode:'ifMissing', getter: () => crypto.randomUUID() }
   },
 
   // 自动 seq（默认启用、按需生效）

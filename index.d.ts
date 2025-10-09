@@ -103,6 +103,34 @@ export declare class SSEKify extends EventEmitter {
     seqIncrsRedis: number
     lastSeqKvFallbackAt: number
   }
+
+  /**
+   * 获取指定用户的连接数量
+   * @param userId 用户ID
+   * @returns 该用户的连接数量
+   */
+  getUserConnectionCount(userId: UserId): number
+
+  /**
+   * 获取指定用户的所有连接ID
+   * @param userId 用户ID
+   * @returns 该用户的所有连接ID数组
+   */
+  getUserConnectionIds(userId: UserId): string[]
+
+  /**
+   * 获取所有用户的连接统计信息
+   * @returns 用户ID到连接数的映射
+   */
+  getAllUsersConnectionStats(): Record<string, number>
+
+  /**
+   * 检查用户是否在线（有至少一个连接）
+   * @param userId 用户ID
+   * @returns 用户是否在线
+   */
+  isUserOnline(userId: UserId): boolean
+
   clearRecent(userId?: UserId): void
   constructor(opts?: SSEKifyOptions)
 

@@ -1,6 +1,6 @@
 {
     "name": "ssekify",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "Framework-agnostic Server-Sent Events helper for Node.js with optional Redis Pub/Sub.",
     "license": "MIT",
     "author": "rockyshi1993@gmail.com",

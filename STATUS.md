@@ -10,6 +10,7 @@
     - ✅ 断线清理（close/error）
     - ✅ 浏览器重连建议（retry 行）
     - ✅ 轻量重放（Last-Event-ID + per-user recent buffer + TTL/LRU 治理 + clearRecent API）
+    - ✅ **用户连接数统计（getUserConnectionCount/getUserConnectionIds/getAllUsersConnectionStats/isUserOnline）**
 - 消息分发：
     - ✅ 单用户推送 sendToUser
     - ✅ 全员广播 sendToAll
