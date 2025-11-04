@@ -9,6 +9,8 @@
 - 每连接写入队列 + drain 背压（队列条数/字节上限、丢弃策略）
 - 同时支持 CommonJS 与原生 ESM，内置 TypeScript 类型声明
 
+> **配套前端客户端**: sseKify 是 **Node.js 服务端 SSE 工具**，推荐与 [vsse](https://www.npmjs.com/package/vsse)（前端 SSE 客户端）配合使用。vsse 提供单连接多任务复用、`postAndListen` 模式、自动重连、心跳检测等能力，与 sseKify 的 `publish` 和事件路由完美协同。
+
 ---
 
 ### 目录
@@ -381,18 +383,300 @@ app.get('/sse', authFromQuery, (req,res)=>{
     - 一键联调：examples/express/cross-callback.api.http
 
 ### 与 vsse 协同（postAndListen）
-- 事件名一致：若前端 SSEClient({ eventName: 'notify' })，服务端发送时也应 { event: 'notify' }；默认均为 'message'。
-- requestId 对齐：在 data JSON 顶层包含本次调用的 requestId，前端才能将消息路由到对应回调。
-- 阶段建议：phase 使用 'progress' | 'done' | 'error'；前端在 done/error 时会自动取消该 requestId 的监听。
 
-示例（业务服务不持有连接，仅发布；入口服务持有连接并订阅 Redis）：
+sseKify 与 [vsse](https://www.npmjs.com/package/vsse) 是配套设计的前后端 SSE 解决方案：
+
+**架构模式**：
+- **服务端（sseKify）**：接收并管理 SSE 长连接、跨实例分发、按 `requestId` 路由消息到对应用户
+- **前端（vsse）**：管理单个 SSE 长连接，通过 `postAndListen` 发起任务并订阅结果
+
+**协同要点**：
+
+1. **事件名一致**：
+   ```js
+   // 服务端（sseKify）
+   sse.sendToUser('alice', data, { event: 'notify' });
+   // 或跨实例
+   await sse.publish(data, 'alice', { event: 'notify' });
+   
+   // 前端（vsse）
+   const sse = new SSEClient({ 
+     url: '/sse?userId=alice', 
+     eventName: 'notify'  // 必须与服务端一致
+   });
+   ```
+
+2. **requestId 对齐**：
+   - 前端通过 `postAndListen` 发起请求时会生成 `requestId`
+   - 服务端发送的数据必须在顶层包含相同的 `requestId`
+   - vsse 会根据 `requestId` 自动路由消息到对应的回调函数
+   
+   ```js
+   // 前端发起
+   const { requestId } = await sse.postAndListen(
+     '/api/chat',
+     { message: 'Hello' },
+     (msg) => console.log(msg)
+   );
+   
+   // 服务端接收并发送（data 必须包含 requestId）
+   app.post('/api/chat', async (req, res) => {
+     const { requestId } = req.body;
+     // 返回 HTTP 响应
+     res.json({ requestId, status: 'processing' });
+     // 异步推送 SSE 消息
+     await sse.publish({ 
+       requestId,  // 必须包含
+       phase: 'progress',
+       type: 'chat',
+       payload: { content: 'chunk...' }
+     }, req.user.id, { event: 'notify' });
+   });
+   ```
+
+3. **生命周期阶段**：使用 `phase` 字段控制消息流
+   - `phase: 'progress'` - 进度中（vsse 持续接收）
+   - `phase: 'done'` - 完成（vsse 自动取消该 requestId 的监听）
+   - `phase: 'error'` - 错误（vsse 自动取消该 requestId 的监听）
+   
+   ```js
+   // 进度中
+   await sse.publish({ 
+     requestId, 
+     phase: 'progress',
+     type: 'chat',
+     payload: { content: chunk }
+   }, userId, { event: 'notify' });
+   
+   // 完成（前端会自动清理该 requestId 的监听）
+   await sse.publish({ 
+     requestId, 
+     phase: 'done',
+     payload: { content: fullText, length: fullText.length }
+   }, userId, { event: 'notify' });
+   
+   // 错误（前端会自动清理该 requestId 的监听）
+   await sse.publish({ 
+     requestId, 
+     phase: 'error',
+     error: { code: 'UpstreamOrDbError', message: err.message }
+   }, userId, { event: 'notify' });
+   ```
+
+4. **心跳配置对齐**：
+   ```js
+   // 服务端
+   const sse = new SSEKify({
+     keepAliveMs: 15_000  // 每 15 秒发送心跳
+   });
+   
+   // 前端
+   const client = new SSEClient({
+     expectedPingInterval: 15_000  // 期望 15 秒收到心跳
+   });
+   ```
+
+5. **跨实例部署**：入口服务持有连接，业务服务通过 Redis 发布消息
+   ```js
+   // 入口服务：接收 SSE 连接
+   app.get('/sse', (req, res) => {
+     const userId = req.query.userId;
+     sse.registerConnection(userId, res);
+   });
+   
+   // 业务服务：处理任务并发布消息（自动路由到持有连接的实例）
+   app.post('/api/process', async (req, res) => {
+     const { requestId } = req.body;
+     res.json({ requestId, status: 'processing' });
+     
+     // 发布到 Redis，入口服务会接收并推送给对应用户
+     await sse.publish({ 
+       requestId, 
+       phase: 'progress',
+       payload: { percent: 50 }
+     }, userId, { event: 'notify' });
+   });
+   ```
+
+**完整示例：AI 对话场景**
+
 ```js
-// 业务服务（仅发布）
-await sse.publish({ requestId, phase: 'progress', type: 'chat', payload: { content: chunk } }, userId, { event: 'notify' })
-await sse.publish({ requestId, phase: 'done',     payload: { content, length: content.length } }, userId, { event: 'notify' })
-// 出错：
-await sse.publish({ requestId, phase: 'error',    error: { code: 'UpstreamOrDbError', message: err.message } }, userId, { event: 'notify' })
+// ========== 服务端（sseKify + Express）==========
+const express = require('express');
+const { SSEKify, createIORedisAdapter } = require('ssekify');
+
+const app = express();
+app.use(express.json());
+
+const sse = new SSEKify({
+  redis: createIORedisAdapter(process.env.REDIS_URL),
+  channel: 'ssekify:bus',
+  keepAliveMs: 15_000,
+  recentBufferSize: 50
+});
+
+// SSE 连接端点
+app.get('/sse', (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ error: 'userId required' });
+  }
+  sse.registerConnection(userId, res);
+});
+
+// AI 对话端点
+app.post('/api/chat', async (req, res) => {
+  const { requestId, message } = req.body;
+  const userId = req.user.id; // 从认证中间件获取
+  
+  // 立即返回 HTTP 响应
+  res.json({ requestId, status: 'processing' });
+  
+  // 异步处理 AI 对话并推送进度
+  (async () => {
+    try {
+      let fullContent = '';
+      
+      // 模拟 AI 流式响应
+      for (let i = 0; i < 10; i++) {
+        const chunk = `这是第 ${i + 1} 段内容。`;
+        fullContent += chunk;
+        
+        // 推送进度
+        await sse.publish({
+          requestId,
+          phase: 'progress',
+          type: 'chat',
+          payload: { 
+            content: chunk,
+            percent: (i + 1) * 10 
+          }
+        }, userId, { event: 'notify' });
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // 完成
+      await sse.publish({
+        requestId,
+        phase: 'done',
+        payload: { 
+          content: fullContent,
+          totalChunks: 10
+        }
+      }, userId, { event: 'notify' });
+    } catch (err) {
+      // 错误
+      await sse.publish({
+        requestId,
+        phase: 'error',
+        error: { 
+          code: 'AI_ERROR',
+          message: err.message 
+        }
+      }, userId, { event: 'notify' });
+    }
+  })();
+});
+
+app.listen(3000, () => console.log('Server running on :3000'));
+
+// ========== 前端（vsse）==========
+import { SSEClient } from 'vsse';
+
+const sse = new SSEClient({
+  url: '/sse?userId=alice',
+  eventName: 'notify',
+  expectedPingInterval: 15_000,
+  token: localStorage.getItem('authToken') // 自动添加 Authorization 头
+});
+
+// 发起对话
+async function chat(message) {
+  let fullContent = '';
+  
+  const { requestId, response, unsubscribe } = await sse.postAndListen(
+    '/api/chat',
+    { message },
+    ({ phase, type, payload, error }) => {
+      if (phase === 'progress' && type === 'chat') {
+        // 显示进度
+        fullContent += payload.content;
+        updateUI(fullContent, payload.percent);
+      } else if (phase === 'done') {
+        // 完成
+        console.log('对话完成:', payload);
+        showComplete(fullContent);
+      } else if (phase === 'error') {
+        // 错误
+        console.error('对话失败:', error);
+        showError(error.message);
+      }
+    }
+  );
+  
+  console.log('Request ID:', requestId);
+  console.log('HTTP Status:', response.status);
+  
+  // 可选：手动取消订阅（通常由 done/error 自动触发）
+  // unsubscribe();
+}
+
+// 使用
+chat('你好，请介绍一下 SSE');
 ```
+
+**常见模式：业务服务与入口服务分离**
+
+```js
+// 入口服务（仅持有连接，不处理业务逻辑）
+const entrySSE = new SSEKify({
+  redis: createIORedisAdapter(REDIS_URL),
+  channel: 'app:sse',
+  keepAliveMs: 15_000
+});
+
+app.get('/sse', (req, res) => {
+  entrySSE.registerConnection(req.query.userId, res);
+});
+
+// 业务服务（处理逻辑，不持有连接）
+const businessSSE = new SSEKify({
+  redis: createIORedisAdapter(REDIS_URL),
+  channel: 'app:sse'  // 相同的频道
+});
+
+app.post('/api/task', async (req, res) => {
+  const { requestId } = req.body;
+  res.json({ requestId });
+  
+  // 使用 publish（不是 sendToUser）进行跨实例分发
+  await businessSSE.publish({
+    requestId,
+    phase: 'progress',
+    payload: { step: 'processing' }
+  }, req.user.id, { event: 'notify' });
+});
+```
+
+**注意事项**：
+- ⚠️ **publish vs sendToUser**：
+  - `sendToUser` 仅作用于当前实例持有的连接
+  - `publish` 通过 Redis 跨实例分发，适用于分离架构
+  - 如果业务服务不持有连接，必须使用 `publish`
+  
+- ⚠️ **requestId 必填**：
+  - vsse 依赖 `requestId` 进行消息路由
+  - 缺少 `requestId` 的消息会被路由到全局广播（`onBroadcast`）
+  
+- ⚠️ **phase 的重要性**：
+  - `done` 和 `error` 会触发 vsse 自动清理监听器
+  - 忘记发送 `done/error` 会导致内存泄漏
+
+**参考资源**：
+- vsse 文档：https://www.npmjs.com/package/vsse
+- vsse 源码：查看 vsse 的 `src/` 目录
+- 完整示例：vsse 的 `examples/` 目录提供了详细的使用示例
 
 ---
 
